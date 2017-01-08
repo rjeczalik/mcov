@@ -1,11 +1,13 @@
 // Package covmerge takes the results from multiple `go test -coverprofile` runs and
 // merges them into one profile
-package covmerg
+package covmerge
 
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sort"
 
 	"golang.org/x/tools/cover"
@@ -110,7 +112,13 @@ func dumpProfiles(profiles []*cover.Profile, out io.Writer) error {
 //
 // TODO(rjeczalik): research recovery for "conflicting merge overlaps".
 func MergeFiles(input []string, output string) error {
-	f, err := os.Create(output)
+	dir, file := filepath.Split(output)
+	if dir == "" {
+		dir = "."
+	}
+
+	// Write to a temporary file in case output file is in input slice.
+	f, err := ioutil.TempFile(dir, file)
 	if err != nil {
 		return err
 	}
@@ -142,7 +150,7 @@ func MergeFiles(input []string, output string) error {
 		return nonil(err, os.Remove(f.Name()))
 	}
 
-	return nil
+	return os.Rename(f.Name(), output)
 }
 
 func nonil(err ...error) error {
