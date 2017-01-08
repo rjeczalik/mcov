@@ -150,6 +150,10 @@ func MergeFiles(input []string, output string) error {
 		return nonil(err, os.Remove(f.Name()))
 	}
 
+	for _, file := range input {
+		_ = os.Remove(file)
+	}
+
 	return os.Rename(f.Name(), output)
 }
 
