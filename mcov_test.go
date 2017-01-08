@@ -13,6 +13,7 @@ var gopath = "testdata" + string(os.PathListSeparator) + os.Getenv("GOPATH")
 
 func TestExample(t *testing.T) {
 	coverprofile := filepath.FromSlash("testdata/src/example/example.cover")
+	defer os.Remove(coverprofile)
 
 	_, err := run("go", "test", "-coverprofile", coverprofile, "example")
 	if err != nil {
