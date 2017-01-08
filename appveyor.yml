@@ -1,0 +1,28 @@
+version: "0.1.{build}"
+
+os: Windows Server 2012 R2
+
+clone_folder: C:\gopath\src\github.com\rjeczalik\mcov
+shallow_clone: true
+
+environment:
+  GOPATH: C:\gopath
+  PATH: C:\gopath\bin;%PATH%
+
+platform:
+  - x64
+
+install:
+  - go version
+  - go env
+  - go get -t ./...
+
+build_script:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - echo %PATH%
+  - echo %GOPATH%
+
+test_script:
+  - ps: go test -race -v ./...
+
+deploy: off
