@@ -2,6 +2,7 @@ package mcov_test
 
 import (
 	"bytes"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -9,7 +10,27 @@ import (
 	"testing"
 )
 
-var gopath = "testdata" + string(os.PathListSeparator) + os.Getenv("GOPATH")
+var env []string
+
+func init() {
+	testdata, err := filepath.Abs("testdata")
+	if err != nil {
+		log.Fatalf("filepath.Abs()=%s", err)
+	}
+
+	gopath := testdata + string(os.PathListSeparator) + os.Getenv("GOPATH")
+
+	env = os.Environ()
+
+	for i, s := range env {
+		if strings.HasPrefix(s, "GOPATH=") {
+			env[i] = "GOPATH=" + gopath
+			return
+		}
+	}
+
+	env = append(env, "GOPATH="+gopath)
+}
 
 func TestExample(t *testing.T) {
 	coverprofile := filepath.FromSlash("testdata/src/example/example.cover")
@@ -40,7 +61,7 @@ func run(cmd string, args ...string) (string, error) {
 	var buf bytes.Buffer
 
 	c := exec.Command(cmd, args...)
-	c.Env = append(os.Environ(), "GOPATH="+gopath)
+	c.Env = env
 	c.Stdout = &buf
 	c.Stderr = os.Stderr
 
